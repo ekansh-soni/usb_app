@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:usb_app/routes/app_routes.dart';
+import 'package:usb_app/utils/data_records.dart';
 import '../models/user_model.dart';
 import '../service/database_helper.dart';
 import '../service/toast_service.dart'; // ✅ Import toast service
@@ -21,7 +26,7 @@ class AuthController extends GetxController {
   }
 
   // Sign Up function
-  Future<void> signUp({
+  /*Future<void> signUp({
     required String name,
     required String email,
     required String password,
@@ -65,7 +70,7 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
+  }*/
 
   // Login function
   Future<void> login({
@@ -98,6 +103,71 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+
+  File signupFile = File(DataRecords.signUP);
+
+
+  Future<void> signupUser(Map<String, dynamic> user) async {
+    List users = [];
+
+    if (await signupFile.exists()) {
+      String content = await signupFile.readAsString();
+
+      if (content.isNotEmpty) {
+        users = jsonDecode(content);
+      }
+    }
+
+    // auto increment id
+    int newId = 1;
+    if (users.isNotEmpty) {
+      newId = users.last["id"] + 1;
+    }
+
+    user["id"] = newId;
+
+    users.add(user);
+
+    await signupFile.writeAsString(jsonEncode(users));
+    ToastService.showSuccess("Signup successful! 🎉");
+    Get.offAllNamed(AppRoutes.home);
+  }
+
+  Future<List> getUsers() async {
+
+    if (!await signupFile.exists()) {
+      return [];
+    }
+
+    String content = await signupFile.readAsString();
+
+    if (content.isEmpty) {
+      return [];
+    }
+
+    return jsonDecode(content);
+  }
+  UserModel? user;
+  Future<bool> loginUser(String email, String password) async {
+
+    List users = await getUsers();
+
+    for (var userMap in users) {
+      if (userMap["email"] == email && userMap["password"] == password) {
+
+        user = UserModel.fromMap(userMap);
+
+        ToastService.showSuccess("Welcome back, ${user?.name}! 👋");
+        Get.offAllNamed('/home');
+
+        return true;
+      }
+    }
+
+    ToastService.showError("Incorrect Credential");
+    return false;
   }
 
   // Logout function

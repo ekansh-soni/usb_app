@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controller/auth_controller.dart';
 
 class SignupScreen extends StatelessWidget {
-  final AuthController _authController = Get.find<AuthController>();
+  final AuthController controller = Get.find<AuthController>();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -118,40 +118,30 @@ class SignupScreen extends StatelessWidget {
                 },
               ),
 
-              SizedBox(height: 15),
 
-              // Confirm Password
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  hintText: '******',
-                ),
-                validator: (value) {
-                  if (value != _passwordController.text) {
-                    return 'Password match nahi ho raha';
-                  }
-                  return null;
-                },
-              ),
 
               SizedBox(height: 30),
 
               // Signup Button
               Obx(() =>
-              _authController.isLoading.value
+              controller.isLoading.value
                   ? CircularProgressIndicator()
                   : ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _authController.signUp(
+                 /*   controller.signUp(
                       name: _nameController.text.trim(),
                       email: _emailController.text.trim(),
                       password: _passwordController.text.trim(),
                       phone: _phoneController.text.trim(),
-                    );
+                    );*/
+
+                    controller.signupUser({
+                      "name": _nameController.text,
+                      "email": _emailController.text,
+                      "phone": _phoneController.text,
+                      "password": _passwordController.text
+                    });
                   }
                 },
                 child: Text(

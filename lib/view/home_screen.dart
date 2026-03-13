@@ -51,7 +51,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Namaste, ${_authController.currentUser.value?.name ?? ''} 👋',
+                  'Namaste, ${_authController.user?.name ?? ''} 👋',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,

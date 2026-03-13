@@ -6,8 +6,8 @@ import '../controller/auth_controller.dart';
 class LoginScreen extends StatelessWidget {
   final AuthController _authController = Get.find<AuthController>();
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController(text: "ekansh@gmail.com");
+  final TextEditingController _passwordController = TextEditingController(text: "123456789");
   final _formKey = GlobalKey<FormState>();
 
   LoginScreen({super.key});
@@ -108,9 +108,9 @@ class LoginScreen extends StatelessWidget {
                         : ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          _authController.login(
-                            email: _emailController.text.trim(),
-                            password: _passwordController.text.trim(),
+                          _authController.loginUser(
+                             _emailController.text.trim(),
+                             _passwordController.text.trim(),
                           );
                         }
                       },

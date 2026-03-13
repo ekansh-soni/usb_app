@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:usb_app/service/toast_service.dart';
+import '../models/mortgage_item_model.dart';
 import '../models/ornament_model.dart';
 import '../service/database_helper.dart';
 import 'auth_controller.dart';
@@ -16,11 +17,9 @@ class OrnamentController extends GetxController {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final AuthController _authController = Get.find<AuthController>();
 
-  @override
-  void onInit() {
-    super.onInit();
-    loadOrnaments();
-  }
+  RxList<MortgageItemModel> mortgageItems = <MortgageItemModel>[].obs;
+
+
 
   // Saare ornaments load karo
   Future<void> loadOrnaments() async {
@@ -137,6 +136,24 @@ class OrnamentController extends GetxController {
     return total;
   }
 
+  RxInt activeStep = 0.obs;
+
+  void nextStep() {
+    if (activeStep.value < 3) {
+      activeStep.value++;
+    }
+  }
+
+  void previousStep() {
+    if (activeStep.value > 0) {
+      activeStep.value--;
+    }
+  }
+
+  void goToStep(int step) {
+    activeStep.value = step;
+  }
+
   // User personal info
 
   TextEditingController borrowerName = TextEditingController();
@@ -148,4 +165,38 @@ class OrnamentController extends GetxController {
   TextEditingController mortgageItem = TextEditingController();
   TextEditingController mortgageItemWeight = TextEditingController();
   TextEditingController mortgageItemQty = TextEditingController();
+
+
+  // loan details
+
+  TextEditingController loanTenure = TextEditingController();
+  TextEditingController loanAmount = TextEditingController();
+  TextEditingController loanInterest = TextEditingController();
+  TextEditingController mortgageItemTotalWeight = TextEditingController();
+  TextEditingController mortgageItemImage = TextEditingController();
+
+  //  guarantor details
+
+
+  TextEditingController guarantorName = TextEditingController();
+  TextEditingController guarantorAddress = TextEditingController();
+  TextEditingController guarantorMobile = TextEditingController();
+
+
+
+  @override
+  void onInit() {
+    super.onInit();
+    mortgageItems.add(MortgageItemModel());
+    loadOrnaments();
+  }
+
+  void addMortgageItem() {
+    mortgageItems.add(MortgageItemModel());
+  }
+
+  void removeMortgageItem(int index) {
+    mortgageItems.removeAt(index);
+  }
+
 }

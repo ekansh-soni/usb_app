@@ -23,7 +23,7 @@ class UserModel {
       email: map['email'],
       password: map['password'],
       phone: map['phone'],
-      createdAt: map['created_at'],
+      createdAt: map['created_at'] ?? DateTime.now().toString(),
     );
   }
 

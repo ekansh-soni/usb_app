@@ -4,6 +4,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:usb_app/routes/app_routes.dart';
 import 'package:usb_app/service/database_helper.dart';
 import 'package:usb_app/theme/app_theme.dart';
+
 import 'bindings/initial_bindings.dart';
 
 void main() async {
@@ -12,7 +13,6 @@ void main() async {
   try {
 
     await DatabaseHelper().init();
-
     InitialBinding().dependencies();
 
     debugPrint('App initialized successfully');
