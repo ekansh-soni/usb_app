@@ -176,6 +176,7 @@ class OrnamentController extends GetxController {
   TextEditingController loanTenure = TextEditingController();
   TextEditingController loanAmount = TextEditingController();
   TextEditingController loanInterest = TextEditingController();
+  TextEditingController loanNote = TextEditingController();
   TextEditingController mortgageItemTotalWeight = TextEditingController();
   TextEditingController mortgageItemImage = TextEditingController();
 

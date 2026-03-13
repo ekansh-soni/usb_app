@@ -10,13 +10,6 @@ import '../controller/ornament_controller.dart';
 
 class AddOrnamentScreen extends StatelessWidget {
   final OrnamentController controller = Get.find<OrnamentController>();
-
-  final TextEditingController _personController = TextEditingController();
-  final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _rateController = TextEditingController();
-  final TextEditingController _interestController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
 
   // Ornament types
@@ -116,7 +109,7 @@ class AddOrnamentScreen extends StatelessWidget {
                                         "loan_amount": controller.loanAmount.text,
                                         "loan_interest": controller.loanInterest.text,
                                         "loan_tenure": controller.loanTenure.text,
-                                        "loan_note": _notesController.text
+                                        "loan_note": controller.loanNote.text
                                       },
 
                                       "guarantor_detail": {
@@ -478,7 +471,7 @@ class AddOrnamentScreen extends StatelessWidget {
 
               // Notes (optional)
               TextFormField(
-                controller: _notesController,
+                controller: controller.loanNote,
                 maxLines: 3,
                 decoration: InputDecoration(
                   labelText: 'Notes',
