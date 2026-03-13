@@ -1,6 +1,7 @@
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:usb_app/routes/app_routes.dart';
 import 'package:usb_app/theme/app_colors.dart';
 import 'package:usb_app/utils/custom_text_widget.dart';
 import 'package:usb_app/utils/utils.dart';
@@ -91,18 +92,64 @@ class AddOrnamentScreen extends StatelessWidget {
                   
                             IntrinsicWidth(
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: ()async {
+
+                                  if (!_formKey.currentState!.validate()) return;
+
+                                  /// FINAL STEP → SAVE DATA
                                   if (controller.activeStep.value == 3) {
-                                    /// SUBMIT FORM
-                                    if (_formKey.currentState!.validate()) {
-                                      print("Submit Data");
-                                    }
+
+                                    List<Map<String, dynamic>> mortgageList =
+                                    controller.mortgageItems.map((item) => item.toMap()).toList();
+
+                                    var map = {
+                                      "borrower_info": {
+                                        "borrower_name": controller.borrowerName.text,
+                                        "borrower_address": controller.borrowerAddress.text,
+                                        "borrower_mobile": controller.borrowerMobile.text,
+                                      },
+
+                                      "mortgage_detail": mortgageList,
+
+                                      "loan_detail": {
+                                        "total_item_weight": controller.mortgageItemTotalWeight.text,
+                                        "loan_amount": controller.loanAmount.text,
+                                        "loan_interest": controller.loanInterest.text,
+                                        "loan_tenure": controller.loanTenure.text,
+                                        "loan_note": _notesController.text
+                                      },
+
+                                      "guarantor_detail": {
+                                        "guarantor_name": controller.guarantorName.text,
+                                        "guarantor_address": controller.guarantorAddress.text,
+                                        "guarantor_mobile": controller.guarantorMobile.text
+                                      },
+
+                                      "mortgage_by": {
+                                        "name": controller.authController.user?.name,
+                                        "id": controller.authController.user?.id,
+                                        "created_at": DateTime.now().toString()
+                                      }
+                                    };
+
+                                    int id = await controller.saveBorrowerDetail(map);
+
+                                    Get.delete<OrnamentController>();
+                                    Get.offAndToNamed(
+                                      AppRoutes.summary,
+                                      arguments: {
+                                        "borrower_id": id
+                                      },
+                                    );
+
+
                                   } else {
-                                    if(_formKey.currentState!.validate()){
-                                      controller.nextStep();
-                                    }
+
+                                    /// NEXT STEP
+                                    controller.nextStep();
 
                                   }
+
                                 },
                                 child: Text(
                                   controller.activeStep.value == 3
@@ -200,6 +247,7 @@ class AddOrnamentScreen extends StatelessWidget {
                   hintText: 'Mobile',
                 ),
                 keyboardType: .number,
+                maxLength: 10,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Enter mobile';
@@ -340,16 +388,12 @@ class AddOrnamentScreen extends StatelessWidget {
               // Weight
               TextFormField(
                 controller: controller.mortgageItemTotalWeight,
-                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Total item weight',
                   prefixIcon: Icon(Icons.monitor_weight),
                   hintText: '10.5g',
                 ),
-                onChanged: (value) {
-                  // ✅ Jab value change ho to observable update karo
-                  weight.value = double.tryParse(value) ?? 0;
-                },
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Enter weight';
@@ -417,22 +461,14 @@ class AddOrnamentScreen extends StatelessWidget {
 
               TextFormField(
                 controller: controller.loanTenure,
-                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Tenure',
                   prefixIcon: Icon(Icons.watch_later_outlined),
                   hintText: '3 M/Y',
                 ),
-                onChanged: (value) {
-                  // ✅ Jab value change ho to observable update karo
-                  interest.value = double.tryParse(value) ?? 0;
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Enter tenure';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter valid tenure';
                   }
                   return null;
                 },
@@ -505,13 +541,15 @@ class AddOrnamentScreen extends StatelessWidget {
               spaceHeight(15),
 
               TextFormField(
-                controller: controller.borrowerMobile,
+                controller: controller.guarantorMobile,
                 decoration: InputDecoration(
                   labelText: 'Mobile',
                   prefixIcon: Icon(Icons.phone_android),
                   hintText: 'Mobile',
                 ),
                 keyboardType: .number,
+                maxLength: 10,
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Enter mobile';
@@ -528,18 +566,3 @@ class AddOrnamentScreen extends StatelessWidget {
     );
   }
 }
-/*
-{
-if (_formKey.currentState!.validate()) {
-controller.addOrnament(
-personName: _personController.text.trim(),
-ornamentType: selectedType.value,
-weight: double.parse(_weightController.text),
-rate: double.parse(_rateController.text),
-notes: _notesController.text.isEmpty
-? null
-    : _notesController.text.trim(),
-interest: double.parse(_interestController.text)
-);
-}
-},*/

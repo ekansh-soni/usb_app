@@ -47,6 +47,7 @@ dependencies:
   path_provider: ^2.1.0
   oktoast: ^3.3.1
   easy_stepper: ^1.0.1
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:

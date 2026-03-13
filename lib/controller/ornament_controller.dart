@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:usb_app/service/toast_service.dart';
 import '../models/mortgage_item_model.dart';
 import '../models/ornament_model.dart';
 import '../service/database_helper.dart';
+import '../utils/data_records.dart';
 import 'auth_controller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -15,7 +19,7 @@ class OrnamentController extends GetxController {
   var totalItems = 0.obs;
 
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  final AuthController _authController = Get.find<AuthController>();
+  final AuthController authController = Get.find<AuthController>();
 
   RxList<MortgageItemModel> mortgageItems = <MortgageItemModel>[].obs;
 
@@ -26,7 +30,7 @@ class OrnamentController extends GetxController {
     try {
       isLoading.value = true;
 
-      int userId = _authController.currentUser.value?.id ?? 0;
+      int userId = authController.currentUser.value?.id ?? 0;
 
       if (userId > 0) {
         var loadedOrnaments = await _dbHelper.getUserOrnaments(userId);
@@ -42,7 +46,7 @@ class OrnamentController extends GetxController {
 
   // Stats load karo (total weight, price, items)
   Future<void> loadStats() async {
-    int userId = _authController.currentUser.value?.id ?? 0;
+    int userId = authController.currentUser.value?.id ?? 0;
 
     if (userId > 0) {
       var stats = await _dbHelper.getTotalStats(userId);
@@ -64,7 +68,7 @@ class OrnamentController extends GetxController {
     try {
       isLoading.value = true;
 
-      int userId = _authController.currentUser.value?.id ?? 0;
+      int userId = authController.currentUser.value?.id ?? 0;
 
       if (userId == 0) {
         Fluttertoast.showToast(msg: "User not found!");
@@ -182,6 +186,35 @@ class OrnamentController extends GetxController {
   TextEditingController guarantorAddress = TextEditingController();
   TextEditingController guarantorMobile = TextEditingController();
 
+
+
+  File borrowerDetailFile = File(DataRecords.borrowerDetail);
+  Future<int> saveBorrowerDetail(Map<String, dynamic> mortgageData) async {
+
+    List borrowerDetail = [];
+
+    if (await borrowerDetailFile.exists()) {
+      String content = await borrowerDetailFile.readAsString();
+
+      if (content.isNotEmpty) {
+        borrowerDetail = jsonDecode(content);
+      }
+    }
+
+    int newId = borrowerDetail.isEmpty
+        ? 1
+        : borrowerDetail.last["borrower_id"] + 1;
+
+    mortgageData["borrower_id"] = newId;
+
+    borrowerDetail.add(mortgageData);
+
+    await borrowerDetailFile.writeAsString(jsonEncode(borrowerDetail));
+
+    ToastService.showSuccess("Record Save successfully");
+
+    return newId;
+  }
 
 
   @override

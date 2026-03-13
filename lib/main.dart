@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:usb_app/routes/app_routes.dart';
 import 'package:usb_app/service/database_helper.dart';
+import 'package:usb_app/service/shared_preference_helper.dart';
 import 'package:usb_app/theme/app_theme.dart';
 
 import 'bindings/initial_bindings.dart';
@@ -15,6 +16,7 @@ void main() async {
     await DatabaseHelper().init();
     InitialBinding().dependencies();
 
+    await SharedPreferencesHelper().init();
     debugPrint('App initialized successfully');
 
     runApp(MyApp());

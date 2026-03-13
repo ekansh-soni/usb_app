@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:usb_app/routes/app_routes.dart';
+import 'package:usb_app/service/shared_preference_helper.dart';
 import '../controller/auth_controller.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -11,7 +12,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // 2 second baad navigate karo
     Future.delayed(Duration(seconds: 2), () {
-      if (_authController.isLoggedIn.value) {
+      if (SharedPreferencesHelper().getBool("isLogin")== true) {
         Get.offNamed(AppRoutes.home);
       } else {
         Get.offNamed(AppRoutes.login);

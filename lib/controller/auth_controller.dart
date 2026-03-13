@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usb_app/routes/app_routes.dart';
+import 'package:usb_app/service/shared_preference_helper.dart';
 import 'package:usb_app/utils/data_records.dart';
 import '../models/user_model.dart';
 import '../service/database_helper.dart';
@@ -152,6 +154,7 @@ class AuthController extends GetxController {
   UserModel? user;
   Future<bool> loginUser(String email, String password) async {
 
+
     List users = await getUsers();
 
     for (var userMap in users) {
@@ -161,7 +164,7 @@ class AuthController extends GetxController {
 
         ToastService.showSuccess("Welcome back, ${user?.name}! 👋");
         Get.offAllNamed('/home');
-
+        SharedPreferencesHelper().setBool("isLogin", true);
         return true;
       }
     }
