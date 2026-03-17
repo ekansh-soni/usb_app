@@ -165,6 +165,8 @@ class AuthController extends GetxController {
         ToastService.showSuccess("Welcome back, ${user?.name}! 👋");
         Get.offAllNamed('/home');
         SharedPreferencesHelper().setBool("isLogin", true);
+        SharedPreferencesHelper().setInt("userId", user?.id ?? 0);
+        SharedPreferencesHelper().setString("userName", user?.name ?? '');
         return true;
       }
     }

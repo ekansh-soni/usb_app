@@ -28,3 +28,7 @@ String getTime(String dateTimeStr) {
   DateTime dt = DateTime.parse(dateTimeStr.replaceFirst(" ", "T"));
   return dt.toIso8601String().split("T")[1].split(".")[0]; // 13:09:00
 }
+
+String checkString(String val){
+  return val.isEmpty ? "N/A" : val;
+}

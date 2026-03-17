@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:usb_app/models/borrower_detail_bean.dart';
 import 'package:usb_app/service/toast_service.dart';
 import '../models/mortgage_item_model.dart';
 import '../models/ornament_model.dart';
@@ -23,89 +24,51 @@ class OrnamentController extends GetxController {
 
   RxList<MortgageItemModel> mortgageItems = <MortgageItemModel>[].obs;
 
+  File borrowerDetailFile = File(DataRecords.borrowerDetail);
+  BorrowerDetailBean? borrowerDetailBean;
 
+  List<BorrowerDetailBean> borrowerDetail = [];
 
-  // Saare ornaments load karo
-  Future<void> loadOrnaments() async {
-    try {
-      isLoading.value = true;
-
-      int userId = authController.currentUser.value?.id ?? 0;
-
-      if (userId > 0) {
-        var loadedOrnaments = await _dbHelper.getUserOrnaments(userId);
-        ornaments.value = loadedOrnaments;
-        await loadStats();
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Error loading ornaments: $e");
-    } finally {
-      isLoading.value = false;
+  Future<List<BorrowerDetailBean>> getBorrowerDetail() async {
+    isLoading(true);
+    if (!await borrowerDetailFile.exists()) {
+      return [];
     }
+
+    String content = await borrowerDetailFile.readAsString();
+
+    if (content.isEmpty) {
+      isLoading(false);
+      return [];
+    }
+
+    final decoded = jsonDecode(content);
+
+    borrowerDetail = (decoded as List).map((e) {
+      isLoading(false);
+      return BorrowerDetailBean.fromJson(e);
+    }).toList();
+
+    double priceSum = 0.0;
+    double weightSum = 0.0;
+    int itemSum = 0;
+
+    for (var i in borrowerDetail) {
+      priceSum += double.tryParse(i.loanDetail?.loanAmount ?? "0") ?? 0;
+      weightSum += double.tryParse(i.loanDetail?.totalItemWeight ?? "0") ?? 0;
+      itemSum += i.mortgageDetail?.length ?? 0;
+    }
+
+    totalPrice.value = priceSum;
+    totalWeight.value = weightSum;
+    totalItems.value = itemSum;
+
+    return borrowerDetail;
   }
 
-  // Stats load karo (total weight, price, items)
-  Future<void> loadStats() async {
-    int userId = authController.currentUser.value?.id ?? 0;
 
-    if (userId > 0) {
-      var stats = await _dbHelper.getTotalStats(userId);
-      totalWeight.value = stats['totalWeight'] ?? 0;
-      totalPrice.value = stats['totalPrice'] ?? 0;
-      totalItems.value = stats['totalItems']?.toInt() ?? 0;
-    }
-  }
 
-  // Naya ornament add karo
-  Future<void> addOrnament({
-    required String personName,
-    required String ornamentType,
-    required double weight,
-    required double rate,
-    required double interest,
-    String? notes,
-  }) async {
-    try {
-      isLoading.value = true;
 
-      int userId = authController.currentUser.value?.id ?? 0;
-
-      if (userId == 0) {
-        Fluttertoast.showToast(msg: "User not found!");
-        return;
-      }
-
-      double totalPrice = weight * rate;
-
-      OrnamentModel newOrnament = OrnamentModel(
-        userId: userId,
-        personName: personName,
-        ornamentType: ornamentType,
-        weight: weight,
-        rate: rate,
-        totalPrice: totalPrice,
-        date: DateTime.now().toIso8601String(),
-        interest: interest,
-        notes: notes,
-      );
-
-      int id = await _dbHelper.addOrnament(newOrnament);
-
-      if (id != -1) {
-        newOrnament.id = id;
-        ornaments.add(newOrnament);
-        await loadStats();
-
-        ToastService.showSuccess("Ornament added successfully! ✨");
-        Get.back();
-      }
-    } catch (e) {
-      ToastService.showError( "Error adding ornament: $e");
-      print( "Error adding ornament: $e");
-    } finally {
-      isLoading.value = false;
-    }
-  }
 
   // Ornament delete karo
   Future<void> deleteOrnament(int id) async {
@@ -114,7 +77,7 @@ class OrnamentController extends GetxController {
 
       if (result > 0) {
         ornaments.removeWhere((item) => item.id == id);
-        await loadStats();
+        // await loadStats();
         Fluttertoast.showToast(msg: "Ornament deleted!");
       }
     } catch (e) {
@@ -124,21 +87,14 @@ class OrnamentController extends GetxController {
 
   // Person ke hisaab se ornaments filter karo
   List<OrnamentModel> getOrnamentsByPerson(String personName) {
-    return ornaments.where((item) =>
-        item.personName.toLowerCase().contains(personName.toLowerCase())
-    ).toList();
+    return ornaments
+        .where(
+          (item) =>
+              item.personName.toLowerCase().contains(personName.toLowerCase()),
+        )
+        .toList();
   }
 
-  // Total price for a specific person
-  double getPersonTotal(String personName) {
-    double total = 0;
-    for (var item in ornaments) {
-      if (item.personName == personName) {
-        total += item.totalPrice;
-      }
-    }
-    return total;
-  }
 
   RxInt activeStep = 0.obs;
 
@@ -170,7 +126,6 @@ class OrnamentController extends GetxController {
   TextEditingController mortgageItemWeight = TextEditingController();
   TextEditingController mortgageItemQty = TextEditingController();
 
-
   // loan details
 
   TextEditingController loanTenure = TextEditingController();
@@ -182,16 +137,11 @@ class OrnamentController extends GetxController {
 
   //  guarantor details
 
-
   TextEditingController guarantorName = TextEditingController();
   TextEditingController guarantorAddress = TextEditingController();
   TextEditingController guarantorMobile = TextEditingController();
 
-
-
-  File borrowerDetailFile = File(DataRecords.borrowerDetail);
   Future<int> saveBorrowerDetail(Map<String, dynamic> mortgageData) async {
-
     List borrowerDetail = [];
 
     if (await borrowerDetailFile.exists()) {
@@ -217,12 +167,12 @@ class OrnamentController extends GetxController {
     return newId;
   }
 
-
   @override
   void onInit() {
     super.onInit();
     mortgageItems.add(MortgageItemModel());
-    loadOrnaments();
+
+    getBorrowerDetail();
   }
 
   void addMortgageItem() {
@@ -232,5 +182,4 @@ class OrnamentController extends GetxController {
   void removeMortgageItem(int index) {
     mortgageItems.removeAt(index);
   }
-
 }
