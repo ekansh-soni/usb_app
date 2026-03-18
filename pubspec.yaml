@@ -48,13 +48,6 @@ dependencies:
   oktoast: ^3.3.1
   easy_stepper: ^1.0.1
   shared_preferences: ^2.5.4
-  flutter_launcher_icons: ^0.14.4
-
-flutter_launcher_icons:
-  windows:
-    generate: true
-    image_path: "assets/icon.png"
-    icon_size: 48
 
 dev_dependencies:
   flutter_test:
